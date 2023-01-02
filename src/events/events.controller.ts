@@ -16,6 +16,8 @@ import { UpdateEventDto } from './update-event.dto';
 import { EventEntity } from './event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, MoreThan, Repository } from 'typeorm';
+import { AttendeeEntity } from './attendee.entity';
+import { EventsService } from './events.service';
 
 @Controller('/events')
 export class EventsController {
@@ -23,6 +25,9 @@ export class EventsController {
   constructor(
     @InjectRepository(EventEntity)
     private readonly repository: Repository<EventEntity>,
+    @InjectRepository(AttendeeEntity)
+    private readonly attendeeRepository: Repository<AttendeeEntity>,
+    private readonly eventsService: EventsService,
   ) {}
 
   @Get()
@@ -51,13 +56,30 @@ export class EventsController {
       },
     });
   }
-  // @Get()
-  // async findAll() {
-  //   return await this.repository.find();
-  // }
+  @Get('/practice2')
+  async practice2() {
+    // return await this.repository.findOne(
+    //     1,
+    //     { relations: ['attendees'] },
+    // );
+    // const event = await this.repository.findOne(1);
+    // const event = new EventEntity();
+    // event.id = 1;
+    // const attendee = new AttendeeEntity();
+    // attendee.name = 'Jerry The Second';
+    // attendee.event = 'event';
+    // await this.attendeeRepository.save(attendee);
+    // return event;
+    return await this.repository
+      .createQueryBuilder('e')
+      .select(['e.id', 'e.name'])
+      .orderBy('e.id', 'ASC')
+      .take(3)
+      .getMany();
+  }
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id) {
-    const event = await this.repository.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const event = await this.eventsService.getEvent(id);
     if (!event) {
       throw new NotFoundException();
     }
