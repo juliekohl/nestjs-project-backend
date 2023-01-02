@@ -7,6 +7,9 @@ import {
   Param,
   Body,
   HttpCode,
+  Logger,
+  ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateEventDto } from './create-event.dto';
 import { UpdateEventDto } from './update-event.dto';
@@ -16,6 +19,7 @@ import { Like, MoreThan, Repository } from 'typeorm';
 
 @Controller('/events')
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
   constructor(
     @InjectRepository(EventEntity)
     private readonly repository: Repository<EventEntity>,
@@ -23,11 +27,10 @@ export class EventsController {
 
   @Get()
   async findAll() {
-    return await this.repository.find();
-  }
-  @Get(':id')
-  async findOne(@Param('id') id) {
-    return await this.repository.findOne(id);
+    this.logger.log(`Hit the findAll route`);
+    const events = await this.repository.find();
+    this.logger.debug(`Found ${events.length} events`);
+    return events;
   }
   @Get('/practice')
   async practice() {
@@ -48,6 +51,18 @@ export class EventsController {
       },
     });
   }
+  // @Get()
+  // async findAll() {
+  //   return await this.repository.find();
+  // }
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id) {
+    const event = await this.repository.findOne(id);
+    if (!event) {
+      throw new NotFoundException();
+    }
+    return event;
+  }
   @Post()
   async create(@Body() input: CreateEventDto) {
     return await this.repository.save({
@@ -59,6 +74,10 @@ export class EventsController {
   async update(@Param('id') id, @Body() input: UpdateEventDto) {
     const event = await this.repository.findOne(id);
 
+    if (!event) {
+      throw new NotFoundException();
+    }
+
     return await this.repository.save({
       ...event,
       ...input,
@@ -69,6 +88,11 @@ export class EventsController {
   @HttpCode(204)
   async remove(@Param('id') id) {
     const event = await this.repository.findOne(id);
+
+    if (!event) {
+      throw new NotFoundException();
+    }
+
     await this.repository.remove(event);
   }
 }
