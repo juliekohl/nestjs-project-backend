@@ -9,8 +9,8 @@ import { EventEntity } from './event.entity';
 
 export enum AttendeeAnswerEnum {
   Accepted = 1,
-  Maybe = 2,
-  Rejected = 3,
+  Maybe,
+  Rejected,
 }
 
 @Entity()
