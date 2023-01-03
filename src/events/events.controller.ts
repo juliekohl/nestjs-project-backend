@@ -10,14 +10,18 @@ import {
   Logger,
   ParseIntPipe,
   NotFoundException,
+  Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { CreateEventDto } from './create-event.dto';
-import { UpdateEventDto } from './update-event.dto';
+import { CreateEventDto } from './input/create-event.dto';
+import { UpdateEventDto } from './input/update-event.dto';
 import { EventEntity } from './event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, MoreThan, Repository } from 'typeorm';
 import { AttendeeEntity } from './attendee.entity';
 import { EventsService } from './events.service';
+import { ListEvents } from './input/list.events';
 
 @Controller('/events')
 export class EventsController {
@@ -31,10 +35,13 @@ export class EventsController {
   ) {}
 
   @Get()
-  async findAll() {
-    this.logger.log(`Hit the findAll route`);
-    const events = await this.repository.find();
-    this.logger.debug(`Found ${events.length} events`);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async findAll(@Query() filter: ListEvents) {
+    const events =
+      await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
+        filter,
+        { total: true, currentPage: filter.page, limit: 2 },
+      );
     return events;
   }
   @Get('/practice')
@@ -109,12 +116,10 @@ export class EventsController {
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id) {
-    const event = await this.repository.findOne(id);
+    const result = await this.eventsService.deleteEvent(id);
 
-    if (!event) {
+    if (result?.affected !== 1) {
       throw new NotFoundException();
     }
-
-    await this.repository.remove(event);
   }
 }

@@ -9,8 +9,8 @@ import { EventEntity } from './event.entity';
 
 export enum AttendeeAnswerEnum {
   Accepted = 1,
-  Maybe,
-  Rejected,
+  Maybe = 2,
+  Rejected = 3,
 }
 
 @Entity()
@@ -25,7 +25,7 @@ export class AttendeeEntity {
   @JoinColumn()
   event: EventEntity;
   @Column('enum', {
-    enum: AttendeeAnswerEnum.Accepted
+    enum: AttendeeAnswerEnum.Accepted,
   })
   answer: AttendeeAnswerEnum;
 }

@@ -1,0 +1,10 @@
+POST http://localhost:3000/events
+
+{}
+
+### //get-one
+GET http://localhost:3000/events/1
+
+
+### //get-all
+GET http://localhost:3000/events
