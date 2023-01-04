@@ -15,6 +15,9 @@ import {
   ValidationPipe,
   UseGuards,
   ForbiddenException,
+  SerializeOptions,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { CreateEventDto } from './input/create-event.dto';
 import { UpdateEventDto } from './input/update-event.dto';
@@ -25,12 +28,14 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../auth/user.entity';
 
 @Controller('/events')
+@SerializeOptions({ strategy: 'excludeAll' })
 export class EventsController {
   private readonly logger = new Logger(EventsController.name);
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(ClassSerializerInterceptor)
   async findAll(@Query() filter: ListEvents) {
     const events =
       await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
@@ -83,6 +88,7 @@ export class EventsController {
   }
 
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const event = await this.eventsService.getEvent(id);
     if (!event) {
@@ -93,12 +99,14 @@ export class EventsController {
 
   @Post()
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() input: CreateEventDto, @CurrentUser() user: User) {
     return await this.eventsService.createEvent(input, user);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async update(
     @Param('id') id,
     @Body() input: UpdateEventDto,
