@@ -5,6 +5,9 @@ import { EventEntity } from './event.entity';
 import { AttendeeAnswerEnum } from './attendee.entity';
 import { ListEvents, WhenEventFilter } from './input/list.events';
 import { paginate, PaginateOptions } from '../pagination/paginator';
+import { CreateEventDto } from './input/create-event.dto';
+import { User } from '../auth/user.entity';
+import {UpdateEventDto} from "./input/update-event.dto";
 
 @Injectable()
 export class EventsService {
@@ -79,6 +82,7 @@ export class EventsService {
     }
     return query;
   }
+
   public async getEventsWithAttendeeCountFilteredPaginated(
     filter: ListEvents,
     paginateOptions: PaginateOptions,
@@ -88,6 +92,7 @@ export class EventsService {
       paginateOptions,
     );
   }
+
   public async getEvent(id: number): Promise<EventEntity | undefined> {
     const query = this.getEventsWithAttendeeCountQuery().andWhere(
       'e.id = :id',
@@ -98,6 +103,30 @@ export class EventsService {
 
     return await query.getOne();
   }
+
+  public async createEvent(
+    input: CreateEventDto,
+    user: User,
+  ): Promise<EventEntity> {
+    console.log(user);
+    return await this.eventsRepository.save({
+      ...input,
+      organizer: user,
+      when: new Date(input.when),
+    });
+  }
+
+  public async updateEvent(
+    event: EventEntity,
+    input: UpdateEventDto,
+  ): Promise<EventEntity> {
+    return await this.eventsRepository.save({
+      ...event,
+      ...input,
+      when: input.when ? new Date(input.when) : event.when,
+    });
+  }
+
   public async deleteEvent(id: number): Promise<DeleteResult> {
     return await this.eventsRepository
       .createQueryBuilder('e')
