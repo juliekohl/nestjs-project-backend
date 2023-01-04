@@ -25,7 +25,8 @@ export class AttendeeEntity {
   @JoinColumn()
   event: EventEntity;
   @Column('enum', {
-    enum: AttendeeAnswerEnum.Accepted,
+    enum: AttendeeAnswerEnum,
+    default: AttendeeAnswerEnum.Accepted,
   })
   answer: AttendeeAnswerEnum;
 }
