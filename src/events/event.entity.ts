@@ -13,6 +13,10 @@ import { PaginationResult } from '../pagination/paginator';
 
 @Entity()
 export class EventEntity {
+  constructor(partial?: Partial<EventEntity>) {
+    Object.assign(this, partial);
+  }
+
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
@@ -40,7 +44,6 @@ export class EventEntity {
   attendees: AttendeeEntity[];
 
   @ManyToOne(() => User, (user) => user.organized)
-  @JoinColumn({ name: 'organizerId' })
   @Expose()
   organizer: User;
 

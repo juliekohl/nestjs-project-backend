@@ -11,8 +11,8 @@ import { User } from '../auth/user.entity';
 
 export enum AttendeeAnswerEnum {
   Accepted = 1,
-  Maybe,
-  Rejected,
+  Maybe = 2,
+  Rejected = 3,
 }
 
 @Entity()
@@ -20,10 +20,6 @@ export class AttendeeEntity {
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
-
-  @Column()
-  @Expose()
-  name: string;
 
   @ManyToOne(() => EventEntity, (event) => event.attendees, {
     nullable: true,
@@ -42,6 +38,7 @@ export class AttendeeEntity {
   answer: AttendeeAnswerEnum;
 
   @ManyToOne(() => User, (user) => user.attended)
+  @Expose()
   user: User;
 
   @Column()

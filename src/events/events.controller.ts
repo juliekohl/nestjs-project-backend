@@ -31,6 +31,7 @@ import { User } from '../auth/user.entity';
 @SerializeOptions({ strategy: 'excludeAll' })
 export class EventsController {
   private readonly logger = new Logger(EventsController.name);
+
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
@@ -45,8 +46,8 @@ export class EventsController {
     return events;
   }
 
-  @Get('/practice')
-  async practice() {
+  // @Get('/practice')
+  // async practice() {
     // return await this.repository.find({
     //   select: ['id', 'when'],
     //   where: [
@@ -63,10 +64,10 @@ export class EventsController {
     //     id: 'DESC',
     //   },
     // });
-  }
+  // }
 
-  @Get('/practice2')
-  async practice2() {
+  // @Get('/practice2')
+  // async practice2() {
     // return await this.repository.findOne(
     //     1,
     //     { relations: ['attendees'] },
@@ -85,15 +86,17 @@ export class EventsController {
     //   .orderBy('e.id', 'ASC')
     //   .take(3)
     //   .getMany();
-  }
+  // }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.getEventWithAttendeeCount(id);
+
     if (!event) {
       throw new NotFoundException();
     }
+
     return event;
   }
 
@@ -108,11 +111,11 @@ export class EventsController {
   @UseGuards(AuthGuardJwt)
   @UseInterceptors(ClassSerializerInterceptor)
   async update(
-    @Param('id') id,
+    @Param('id', ParseIntPipe) id,
     @Body() input: UpdateEventDto,
     @CurrentUser() user: User,
   ) {
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.findOne(id);
 
     if (!event) {
       throw new NotFoundException();
@@ -131,8 +134,8 @@ export class EventsController {
   @Delete(':id')
   @UseGuards(AuthGuardJwt)
   @HttpCode(204)
-  async remove(@Param('id') id, @CurrentUser() user: User) {
-    const event = await this.eventsService.getEvent(id);
+  async remove(@Param('id', ParseIntPipe) id, @CurrentUser() user: User) {
+    const event = await this.eventsService.findOne(id);
 
     if (!event) {
       throw new NotFoundException();
