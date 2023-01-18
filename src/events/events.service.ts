@@ -115,6 +115,7 @@ export class EventsService {
   }
 
   public async findOne(id: number): Promise<EventEntity | undefined> {
+    // @ts-ignore
     return await this.eventsRepository.findOne(id);
   }
 
