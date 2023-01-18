@@ -13,5 +13,6 @@ export default registerAs(
     database: process.env.DB_NAME,
     entities: [EventEntity],
     synchronize: false,
+    dropSchema: false,
   }),
 );
